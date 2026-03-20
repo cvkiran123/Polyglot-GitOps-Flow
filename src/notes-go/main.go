@@ -47,7 +47,27 @@ func main() {
 	}
 
 	r := gin.Default()
+// Health Check Endpoint
+    // This returns 200 OK immediately with a tiny JSON payload
+    r.GET("/health", func(c *gin.Context) {
+        c.JSON(200, gin.H{
+            "status": "UP",
+            "time":   time.Now().Format(time.RFC3339),
+        })
+    })
 
+    // Optional: Deep Health Check (Checks if MongoDB is actually reachable)
+    r.GET("/health/ready", func(c *gin.Context) {
+        ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+        defer cancel()
+        
+        err := client.Ping(ctx, nil)
+        if err != nil {
+            c.JSON(503, gin.H{"status": "DOWN", "error": "database unreachable"})
+            return
+        }
+        c.JSON(200, gin.H{"status": "READY"})
+    })
 	// Add CORS middleware
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:3000", "http://127.0.0.1:3000"},

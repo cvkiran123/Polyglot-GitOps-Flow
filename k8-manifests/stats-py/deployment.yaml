@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: stats-py
+  name: stats-py
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stats-py
+  template:
+    metadata:
+      labels:
+        app: stats-py
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+      - image: cvkiran4/note-app-stats-py:latest
+        name: stats-py
+        resources:
+          limits:
+            cpu: "600m"
+            memory: 512Mi
+          requests:
+            cpu: 400m
+            memory: 256Mi
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 7
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 7
+          periodSeconds: 10
+        env:
+        - name: MONGO_USER
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secrets
+              key: username
+        - name: MONGO_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secrets
+              key: password
+        - name: MONGO_URI
+          value: "mongodb://$(MONGO_USER):$(MONGO_PASSWORD)@mongo-service:27017/statsdb?authSource=admin"
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: central-auth-secrets
+              key: JWT_SECRET
+        - name: FRONTEND_URL
+          value: "http://localhost"

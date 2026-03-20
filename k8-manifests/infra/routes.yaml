@@ -1,0 +1,72 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: note-app-routes
+  namespace: note-app
+spec:
+  parentRefs:
+    - name: note-app-gateway
+  hostnames:
+    - "note-app.local"
+  rules:
+    # ---------------------------------------------------------
+    # 1. JAVA AUTH
+    # ---------------------------------------------------------
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /auth
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+      backendRefs:
+        - name: auth-java-service
+          port: 8080
+
+    # ---------------------------------------------------------
+    # 2. PYTHON STATS
+    # ---------------------------------------------------------
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /stats
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+      backendRefs:
+        - name: stats-py-service
+          port: 8000
+
+    # ---------------------------------------------------------
+    # 3. GO NOTES
+    # ---------------------------------------------------------
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /notes
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+      backendRefs:
+        - name: note-go-service
+          port: 8081
+
+    # ---------------------------------------------------------
+    # 4. FRONTEND
+    # ---------------------------------------------------------
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: frontend-service
+          port: 80

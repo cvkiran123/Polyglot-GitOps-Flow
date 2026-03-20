@@ -5,12 +5,17 @@ from pymongo import MongoClient
 from jose import jwt, JWTError
 import os
 
+
+
 app = FastAPI()
+
+# Get the Frontend URL from environment, fallback to localhost if not set
+frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
 
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
+    allow_origins=["frontend_url",
         "http://localhost:3000",
         "http://127.0.0.1:3000"
     ],
@@ -39,3 +44,12 @@ async def get_stats(payload: dict = Depends(verify_token)):
     note_count = db.notes.count_documents({"userId": user_id})
     total_notes = db.notes.count_documents({})
     return {"user_note_count": note_count, "total_notes": total_notes}
+
+@app.get("/health")
+async def health_check():
+    # Optional: Check if MongoDB is alive
+    try:
+        client.admin.command('ping')
+        return {"status": "healthy", "database": "connected"}
+    except Exception:
+        raise HTTPException(status_code=503, detail="Database disconnected")

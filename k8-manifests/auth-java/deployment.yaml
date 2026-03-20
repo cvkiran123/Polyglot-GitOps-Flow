@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-java
+  namespace: note-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-java
+  template:
+    metadata:
+      labels:
+        app: auth-java
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 2000
+      containers:
+      - name: auth-java
+        image: cvkiran4/note-app-auth-java:latest
+        imagePullPolicy: Always
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 45
+          periodSeconds: 15
+        env:
+        # Match your property: ${DB_HOST}:${DB_PORT}/${DB_NAME}
+        - name: DB_HOST
+          value: "postgres-service"
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_NAME
+          value: "notesdb"
+        
+        # Match your property: ${DB_USER}
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secrets
+              key: username
+        
+        # Match your property: ${DB_PASSWORD}
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secrets
+              key: password
+        
+        # Match your property: ${JWT_SECRET}
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: central-auth-secrets
+              key: JWT_SECRET

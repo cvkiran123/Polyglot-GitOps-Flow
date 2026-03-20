@@ -8,11 +8,11 @@
 		<version>3.4.5</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.techieemma</groupId>
+	<groupId>com.note-app</groupId>
 	<artifactId>note-app</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>note-app</name>
-	<description>Techieemma Note App</description>
+	<description> Note App</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -37,6 +37,10 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+    		<groupId>org.springframework.boot</groupId>
+    		<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

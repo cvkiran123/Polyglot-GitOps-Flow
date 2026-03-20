@@ -1,5 +1,5 @@
 ## For Production
-#FROM python:3.10-slim AS builder
+#FROM python:3.11-slim AS builder
 #WORKDIR /app
 #
 ## Install build dependencies
@@ -27,10 +27,14 @@
 #CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 # For Development
-FROM python:3.10-slim
-
+FROM python:3.11-slim
+# Update system packages to patch vulnerabilities
+RUN apt-get update && apt-get upgrade -y && apt-get clean && rm -rf /var/lib/apt/lists/*
+# Create a non-root user
+RUN useradd -m -u 1000 devopsuser
 WORKDIR /app
-
+RUN chown -R devopsuser:devopsuser /app
+USER devopsuser
 # Copy requirements first for better caching
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
@@ -42,4 +46,4 @@ RUN pip install --no-cache-dir uvicorn
 EXPOSE 8000
 
 # Use uvicorn with reload flag for development
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

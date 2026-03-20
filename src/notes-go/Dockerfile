@@ -27,28 +27,31 @@
 # CMD ["./main"]
 
 # For Development
-FROM golang:1.24-alpine
+# --- STAGE 1: Build ---
+FROM golang:1.24-alpine AS builder
+WORKDIR /app
+RUN apk add --no-cache git
+COPY go.mod go.sum* ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags="-w -s" -o main .
+
+# --- STAGE 2: Final Run (Hardened) ---
+FROM alpine:3.19
+# 1. Install CA certificates for HTTPS calls
+RUN apk --no-cache add ca-certificates
+
+# 2. Create a specific non-root user and group
+RUN addgroup -S devopsgroup && adduser -S devopsuser -G devopsgroup -u 1000
 
 WORKDIR /app
 
- # Install air for hot reloading
-RUN go install github.com/air-verse/air@latest
+# 3. Copy the binary and ensure the non-root user owns it
+COPY --from=builder /app/main .
+RUN chown devopsuser:devopsgroup /app/main
 
- # Install dependencies
-RUN apk add --no-cache git
+# 4. Switch to the non-root user
+USER 1000
 
-# Copy go mod and sum files first (for better caching)
-COPY go.mod go.sum ./
-
-# Download and tidy modules
-RUN go mod download
-RUN go mod tidy
-
-# Copy the rest of the source code
-COPY . .
-
- # mount the source code as a volume
 EXPOSE 8081
-
- # air provides hot reload capability
-CMD ["air", "-c", ".air.toml"]
+CMD ["./main"]

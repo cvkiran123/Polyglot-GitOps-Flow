@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: note-app-service
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/cvkiran123/Polyglot-GitOps-Flow.git
+    targetRevision: HEAD
+    path: k8-manifests/note-app-service
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: note-app
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
