@@ -1,7 +1,7 @@
 # Ignore the actual secret files
-k8s-spec/infra/shared-secrets.yaml
-k8s-spec/infra/postgres-secrets.yaml
-k8s-spec/infra/mongo-secrets.yaml
+k8s-manifests/infra/shared-secrets.yaml
+k8s-manifests/infra/postgres-secrets.yaml
+k8s-manifests/infra/mongo-secrets.yaml
 
 # Allow the templates to be tracked
-!k8s-spec/infra/*.yaml.example
+!k8s-manifests/infra/*.yaml.example
