@@ -31,7 +31,7 @@ FROM nginx:mainline-alpine
 RUN set -x \
     && chmod -R g+w /var/cache/nginx \
     && touch /var/run/nginx.pid \
-    && chmod -R g+w /var/run \
+    && chmod g+w /var/run/nginx.pid \
     && chmod -R g+w /var/log/nginx
 
 # Copy build output (Next.js 'out' folder)
