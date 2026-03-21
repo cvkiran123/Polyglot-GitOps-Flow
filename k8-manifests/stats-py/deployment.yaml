@@ -18,7 +18,7 @@ spec:
         runAsNonRoot: true
         runAsUser: 1000
       containers:
-      - image: cvkiran4/note-app-stats-py:latest
+      - image: cvkiran4/note-app-stats-py:22
         name: stats-py
         resources:
           limits:
