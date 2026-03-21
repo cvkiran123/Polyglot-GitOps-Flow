@@ -19,7 +19,7 @@ spec:
         fsGroup: 2000
       containers:
       - name: auth-java
-        image: cvkiran4/note-app-auth-java:17
+        image: cvkiran4/note-app-auth-java:28
         imagePullPolicy: Always
         securityContext:
           allowPrivilegeEscalation: false
