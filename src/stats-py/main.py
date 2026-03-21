@@ -30,7 +30,7 @@ jwt_secret = os.getenv("JWT_SECRET")
 client = MongoClient(mongo_uri)
 db = client["notesdb"]
 
-def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
+async def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
     try:
         token = credentials.credentials
         payload = jwt.decode(token, jwt_secret, algorithms=["HS256"])
