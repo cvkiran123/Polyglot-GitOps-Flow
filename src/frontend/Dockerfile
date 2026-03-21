@@ -1,44 +1,34 @@
-## Stage 1: Build the app for Production
-#FROM node:18-alpine AS builder
-#WORKDIR /app
-#
-#COPY package*.json ./
-#RUN npm install --frozen-lockfile
-#
-#COPY . .
-#RUN npm run build
-#
-## Stage 2: Serve with Nginx
-#FROM nginx:alpine
-#COPY --from=builder /app/out /usr/share/nginx/html
-#COPY nginx.conf /etc/nginx/conf.d/default.conf
-#
-#EXPOSE 80
-#CMD ["nginx", "-g", "daemon off;"]
-
-# for Development
 # Stage 1: Build
 FROM node:18-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
-RUN npm install --frozen-lockfile
+# Using npm install instead of frozen-lockfile if you're troubleshooting dependencies
+RUN npm install
 COPY . .
 RUN NEXT_TELEMETRY_DISABLED=1 npx next build --no-lint
 
-# Stage 2: Serve with Nginx (Production)
+# Stage 2: Serve with Nginx
 FROM nginx:mainline-alpine
-# Security: Run Nginx as a non-root user
-RUN set -x \
-    && chmod -R g+w /var/cache/nginx \
-    && touch /var/run/nginx.pid \
-    && chmod g+w /var/run/nginx.pid \
-    && chmod -R g+w /var/log/nginx
 
-# Copy build output (Next.js 'out' folder)
+# 1. Remove the default config to prevent conflicts
+RUN rm /etc/nginx/conf.d/default.conf
+
+# 2. Copy your build output (ensure 'output: export' is in next.config.js)
 COPY --from=builder /app/out /usr/share/nginx/html
-# Copy custom Nginx config
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# 3. Copy your custom Nginx config to the ROOT location
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# 4. Permissions Fix:
+# We create the PID file in /tmp (as defined in your config) 
+# and give ownership of all necessary paths to user 101.
+RUN touch /tmp/nginx.pid && \
+    chown -R 101:101 /tmp/nginx.pid /usr/share/nginx/html /var/cache/nginx /var/log/nginx /etc/nginx
+
+# 5. Run as non-root
+USER 101
 
 EXPOSE 80
-USER 101
+
+# The -g "daemon off;" is vital for Docker to keep the container running
 CMD ["nginx", "-g", "daemon off;"]
