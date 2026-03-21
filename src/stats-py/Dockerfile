@@ -26,4 +26,4 @@ COPY --chown=devopsuser:devopsuser . .
 EXPOSE 8000
 
 # 7. Start using 'python -m' to guarantee it finds the uvicorn module
-CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", log_level="warning"]
