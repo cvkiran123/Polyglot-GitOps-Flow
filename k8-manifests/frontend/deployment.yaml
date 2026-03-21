@@ -18,7 +18,7 @@ spec:
         runAsUser: 101 # Default Nginx user UID
       containers:
       - name: frontend
-        image: cvkiran4/note-app-frontend:27
+        image: cvkiran4/note-app-frontend:35
         imagePullPolicy: Always
         ports:
         - containerPort: 80
