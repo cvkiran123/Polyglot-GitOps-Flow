@@ -23,7 +23,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install --frozen-lockfile
 COPY . .
-RUN npm run build
+RUN NEXT_TELEMETRY_DISABLED=1 npx next build --no-lint
 
 # Stage 2: Serve with Nginx (Production)
 FROM nginx:mainline-alpine
