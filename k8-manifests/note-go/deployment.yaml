@@ -19,7 +19,7 @@ spec:
         fsGroup: 2000
       containers:
       - name: note-go
-        image: cvkiran4/note-app-note-go:latest
+        image: cvkiran4/note-app-note-go:21
         imagePullPolicy: Always
         securityContext:
           allowPrivilegeEscalation: false
