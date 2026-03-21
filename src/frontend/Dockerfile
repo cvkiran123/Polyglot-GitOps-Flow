@@ -30,6 +30,7 @@ FROM nginx:mainline-alpine
 # Security: Run Nginx as a non-root user
 RUN set -x \
     && chmod -R g+w /var/cache/nginx \
+    && touch /var/run/nginx.pid \
     && chmod -R g+w /var/run \
     && chmod -R g+w /var/log/nginx
 
